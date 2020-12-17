@@ -16,7 +16,7 @@ namespace HeapAndStackMemoryOptimization
         {
             foreach (var item in items)
             {
-                yield return (object) item;
+                yield return item;
             }
         }
     }

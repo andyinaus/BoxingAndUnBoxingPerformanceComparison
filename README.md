@@ -8,25 +8,25 @@ Apart from the fact that boxing is more expensice than unboxing as stated in [MS
 
 |Case|Type|Total time elapsed|Average time per execution|
 |----|----|-----------------:|-------------------------:|
-|ExecuteAndTrackBoxingOperation|Multiple Executions|736 ms|0.00000736 ms|
-|ExecuteAndTrackBoxingOperationInCollectionUsingSelectMethod|Single Execution For Each Item|6266 ms|0.00006266 ms|
-|ExecuteAndTrackBoxingOperationInCollectionUsingCastMethod|Single Execution For Each Item|13401 ms|0.00013401 ms|
-|ExecuteAndTrackBoxingOperationInCollectionUsingOfTypeMethod|Single Execution For Each Item|14133 ms|0.00014133 ms|
-|ExecuteAndTrackBoxingOperationInCollectionUsingMyOwnCastMethod|Single Execution For Each Item|8965 ms|0.00008965 ms|
-|ExecuteAndTrackUnboxingOperation|Multiple Executions|460 ms|0.0000046 ms|
-|ExecuteAndTrackUnboxingOperationInCollectionUsingSelectMethod|Single Execution For Each Item|657 ms|0.00000657 ms|
-|ExecuteAndTrackUnboxingOperationInCollectionUsingCastMethod|Single Execution For Each Item|2817 ms|0.00002817 ms|
-|ExecuteAndTrackUnboxingOperationInCollectionUsingOfTypeMethod|Single Execution For Each Item|2876 ms|0.00002876 ms|
-|ExecuteAndTrackUnboxingOperationInCollectionUsingMyOwnCastMethod|Single Execution For Each Item|3255 ms|0.00003255 ms|
-|ExecuteAndTrackVariableAssignmentForValueTypes|Multiple Executions|356 ms|0.00000356 ms|
-|ExecuteAndTrackVariableAssignmentForReferenceTypes|Multiple Executions|342 ms|0.00000342 ms|
-|ExecuteAndTrackCastingFromReferenceTypeToAnotherReferenceType|Multiple Executions|327 ms|0.00000327 ms|
-|ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingSelectMethod|Single Execution For Each Item|971 ms|0.00000971 ms|
-|ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingCastMethod|Single Execution For Each Item|4020 ms|0.0000402 ms|
-|ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingOfTypeMethod|Single Execution For Each Item|4625 ms|0.00004625 ms|
-|ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingMyOwnCastMethod|Single Execution For Each Item|3921 ms|0.00003921 ms|
+|ExecuteAndTrackBoxingOperation|Multiple Executions|185 ms|0.00000185 ms|
+|ExecuteAndTrackBoxingOperationInCollectionUsingSelectMethod|Single Execution For Each Item|6055 ms|0.00006055 ms|
+|ExecuteAndTrackBoxingOperationInCollectionUsingCastMethod|Single Execution For Each Item|13103 ms|0.00013103 ms|
+|ExecuteAndTrackBoxingOperationInCollectionUsingOfTypeMethod|Single Execution For Each Item|13589 ms|0.00013589 ms|
+|ExecuteAndTrackBoxingOperationInCollectionUsingCustomCastFromValueTypeToObjectMethod|Single Execution For Each Item|7184 ms|0.00007184 ms|
+|ExecuteAndTrackUnboxingOperation|Multiple Executions|246 ms|0.00000246 ms|
+|ExecuteAndTrackUnboxingOperationInCollectionUsingSelectMethod|Single Execution For Each Item|469 ms|0.00000469 ms|
+|ExecuteAndTrackUnboxingOperationInCollectionUsingCastMethod|Single Execution For Each Item|2528 ms|0.00002528 ms|
+|ExecuteAndTrackUnboxingOperationInCollectionUsingOfTypeMethod|Single Execution For Each Item|3024 ms|0.00003024 ms|
+|ExecuteAndTrackUnboxingOperationInCollectionUsingCustomCastFromObjectMethod|Single Execution For Each Item|1789 ms|0.00001789 ms|
+|ExecuteAndTrackVariableAssignmentForValueTypes|Multiple Executions|176 ms|0.00000176 ms|
+|ExecuteAndTrackVariableAssignmentForReferenceTypes|Multiple Executions|180 ms|0.00000180 ms|
+|ExecuteAndTrackCastingFromReferenceTypeToAnotherReferenceType|Multiple Executions|207 ms|0.00000207 ms|
+|ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingSelectMethod|Single Execution For Each Item|834 ms|0.00000834 ms|
+|ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingCastMethod|Single Execution For Each Item|3924 ms|0.00003924 ms|
+|ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingOfTypeMethod|Single Execution For Each Item|4495 ms|0.00004495 ms|
+|ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingCustomCastFromObjectMethod|Single Execution For Each Item|2611 ms|0.00002611 ms|
 
 For comparison with less number of execution, please refer to the below screenshot(s).
 
-![Comparison - 1](https://user-images.githubusercontent.com/12688884/102488954-8685ae00-40b8-11eb-802e-d307a12bd4f7.PNG)
-![Comparison - 2](https://user-images.githubusercontent.com/12688884/102488959-884f7180-40b8-11eb-88f1-752492163a79.PNG)
+![Comparison - 1](https://user-images.githubusercontent.com/12688884/102574183-e7a29580-413b-11eb-9b7d-cf3a3c2c024f.png)
+![Comparison - 2](https://user-images.githubusercontent.com/12688884/102574209-f7ba7500-413b-11eb-9b47-7d9638fbf778.png)

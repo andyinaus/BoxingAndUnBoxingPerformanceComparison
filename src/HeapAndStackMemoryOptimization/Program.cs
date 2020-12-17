@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -7,41 +8,52 @@ namespace HeapAndStackMemoryOptimization
 {
     class Program
     {
-        private static int _numberOfExecutionsOrItemsForEachCase;
+        private static IList<int> _listOfNumbers = new List<int>();
+        private static IList<object> _listOfBoxedNumbers = new List<object>();
+        private static IList<object> _listOfTestItemsAsObject = new List<object>();
 
         static void Main(string[] _)
         {
-            for (_numberOfExecutionsOrItemsForEachCase = 10000; _numberOfExecutionsOrItemsForEachCase <= 100000000; _numberOfExecutionsOrItemsForEachCase *= 10)
+            for (var numberOfExecutionsOrItemsForEachCase = 10000; numberOfExecutionsOrItemsForEachCase <= 100000000; numberOfExecutionsOrItemsForEachCase *= 10)
             {
-                Console.WriteLine($"Comparing with {_numberOfExecutionsOrItemsForEachCase:n0} operations or items in a collection:");
+                Console.WriteLine($"Comparing with {numberOfExecutionsOrItemsForEachCase:n0} executions or items in a collection:");
 
-                ExecuteAndTrackBoxingOperation();
-                ExecuteAndTrackBoxingOperationInCollectionUsingSelectMethod();
-                ExecuteAndTrackBoxingOperationInCollectionUsingCastMethod();
-                ExecuteAndTrackBoxingOperationInCollectionUsingOfTypeMethod();
-                ExecuteAndTrackBoxingOperationInCollectionUsingMyOwnCastMethod();
-                ExecuteAndTrackUnboxingOperation();
-                ExecuteAndTrackUnboxingOperationInCollectionUsingSelectMethod();
-                ExecuteAndTrackUnboxingOperationInCollectionUsingCastMethod();
-                ExecuteAndTrackUnboxingOperationInCollectionUsingOfTypeMethod();
-                ExecuteAndTrackUnboxingOperationInCollectionUsingMyOwnCastMethod();
-                ExecuteAndTrackVariableAssignmentForValueTypes();
-                ExecuteAndTrackVariableAssignmentForReferenceTypes();
-                ExecuteAndTrackCastingFromReferenceTypeToAnotherReferenceType();
-                ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingSelectMethod();
-                ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingCastMethod();
-                ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingOfTypeMethod();
-                ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingMyOwnCastMethod();
+                SetUpData(numberOfExecutionsOrItemsForEachCase);
+
+                ExecuteAndTrackBoxingOperation(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackBoxingOperationInCollectionUsingSelectMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackBoxingOperationInCollectionUsingCastMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackBoxingOperationInCollectionUsingOfTypeMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackBoxingOperationInCollectionUsingCustomCastFromValueTypeToObjectMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackUnboxingOperation(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackUnboxingOperationInCollectionUsingSelectMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackUnboxingOperationInCollectionUsingCastMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackUnboxingOperationInCollectionUsingOfTypeMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackUnboxingOperationInCollectionUsingCustomCastFromObjectMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackVariableAssignmentForValueTypes(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackVariableAssignmentForReferenceTypes(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackCastingFromReferenceTypeToAnotherReferenceType(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingSelectMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingCastMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingOfTypeMethod(numberOfExecutionsOrItemsForEachCase);
+                ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingCustomCastFromObjectMethod(numberOfExecutionsOrItemsForEachCase);
 
                 Console.WriteLine("-----------END LINE-----------\n");
             }
         }
 
-        private static long GetExecutionElapsedTimeForAction(Action operation)
+        private static void SetUpData(int numberOfItems)
+        {
+            _listOfNumbers = Enumerable.Repeat(1, numberOfItems).ToList();
+            _listOfBoxedNumbers = Enumerable.Repeat((object)1, numberOfItems).ToList();
+            _listOfTestItemsAsObject = Enumerable.Repeat((object)new TestItem(), numberOfItems).ToList();
+        }
+
+        private static long GetExecutionElapsedTimeForAction(Action action)
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            operation();
+            action();
             stopwatch.Stop();
 
             // Force GC collection so there is no interference in each test
@@ -50,21 +62,21 @@ namespace HeapAndStackMemoryOptimization
             return stopwatch.ElapsedMilliseconds;
         }
 
-        private static void ExecuteMultipleTimes(Action action)
+        private static void ExecuteMultipleTimes(Action action, int numberOfExecutions)
         {
-            for (var i = 0; i < _numberOfExecutionsOrItemsForEachCase; i++)
+            for (var i = 0; i < numberOfExecutions; i++)
             {
                 action();
             }
         }
 
-        private static void OutputTimeElapsedToConsoleForOperation(long totalMillisecondsElapsed,
-            int numberOfOperationsOrItems, [CallerMemberName] string operationName = "")
+        private static void OutputTimeElapsedToConsole(long totalMillisecondsElapsed,
+            int numberOfExecutionsOrItems, [CallerMemberName] string callerName = "")
         {
-            Console.WriteLine($"{operationName} - total time elapsed: {totalMillisecondsElapsed} ms, average time per operation/item: {(decimal)totalMillisecondsElapsed / numberOfOperationsOrItems} ms");
+            Console.WriteLine($"{callerName} - total time elapsed: {totalMillisecondsElapsed} ms, average time per operation/item: {(decimal)totalMillisecondsElapsed / numberOfExecutionsOrItems} ms");
         }
 
-        private static void ExecuteAndTrackBoxingOperation()
+        private static void ExecuteAndTrackBoxingOperation(int numberOfExecutions)
         {
             const int number = 1;
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
@@ -72,57 +84,53 @@ namespace HeapAndStackMemoryOptimization
                 ExecuteMultipleTimes(() =>
                 {
                     object boxedNumber = number;
-                });
+                }, numberOfExecutions);
             });
             
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, _numberOfExecutionsOrItemsForEachCase);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfExecutions);
         }
 
-        private static void ExecuteAndTrackBoxingOperationInCollectionUsingSelectMethod()
+        private static void ExecuteAndTrackBoxingOperationInCollectionUsingSelectMethod(int numberOfItems)
         {
-            var listOfNumbers = Enumerable.Repeat(1, _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfBoxedNumbers = listOfNumbers.Select(number => (object)number).ToArray();
+                var listOfBoxedNumbers = _listOfNumbers.Select(number => (object)number).ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfNumbers.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackBoxingOperationInCollectionUsingCastMethod()
+        private static void ExecuteAndTrackBoxingOperationInCollectionUsingCastMethod(int numberOfItems)
         {
-            var listOfNumbers = Enumerable.Repeat(1, _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfBoxedNumbers = listOfNumbers.Cast<object>().ToArray();
+                var listOfBoxedNumbers = _listOfNumbers.Cast<object>().ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfNumbers.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackBoxingOperationInCollectionUsingOfTypeMethod()
+        private static void ExecuteAndTrackBoxingOperationInCollectionUsingOfTypeMethod(int numberOfItems)
         {
-            var listOfNumbers = Enumerable.Repeat(1, _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfBoxedNumbers = listOfNumbers.OfType<object>().ToArray();
+                var listOfBoxedNumbers = _listOfNumbers.OfType<object>().ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfNumbers.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackBoxingOperationInCollectionUsingMyOwnCastMethod()
+        private static void ExecuteAndTrackBoxingOperationInCollectionUsingCustomCastFromValueTypeToObjectMethod(int numberOfItems)
         {
-            var listOfNumbers = Enumerable.Repeat(1, _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfBoxedNumbers = listOfNumbers.CastFromValueTypeToObject().ToArray();
+                var listOfBoxedNumbers = _listOfNumbers.CastFromValueTypeToObject().ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfNumbers.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackUnboxingOperation()
+        private static void ExecuteAndTrackUnboxingOperation(int numberOfExecutions)
         {
             object obj = 1;
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
@@ -130,57 +138,53 @@ namespace HeapAndStackMemoryOptimization
                 ExecuteMultipleTimes(() =>
                 {
                     var unboxedNumber = (int)obj;
-                });
+                }, numberOfExecutions);
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, _numberOfExecutionsOrItemsForEachCase);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfExecutions);
         }
 
-        private static void ExecuteAndTrackUnboxingOperationInCollectionUsingSelectMethod()
+        private static void ExecuteAndTrackUnboxingOperationInCollectionUsingSelectMethod(int numberOfItems)
         {
-            var listOfObjects = Enumerable.Repeat((object) 1, _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfUnboxedObjects = listOfObjects.Select(obj => (int)obj).ToArray();
+                var listOfUnboxedObjects = _listOfBoxedNumbers.Select(obj => (int)obj).ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfObjects.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackUnboxingOperationInCollectionUsingCastMethod()
+        private static void ExecuteAndTrackUnboxingOperationInCollectionUsingCastMethod(int numberOfItems)
         {
-            var listOfObjects = Enumerable.Repeat((object)1, _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfUnboxedObjects = listOfObjects.Cast<int>().ToArray();
+                var listOfUnboxedObjects = _listOfBoxedNumbers.Cast<int>().ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfObjects.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackUnboxingOperationInCollectionUsingOfTypeMethod()
+        private static void ExecuteAndTrackUnboxingOperationInCollectionUsingOfTypeMethod(int numberOfItems)
         {
-            var listOfObjects = Enumerable.Repeat((object)1, _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfUnboxedObjects = listOfObjects.OfType<int>().ToArray();
+                var listOfUnboxedObjects = _listOfBoxedNumbers.OfType<int>().ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfObjects.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackUnboxingOperationInCollectionUsingMyOwnCastMethod()
+        private static void ExecuteAndTrackUnboxingOperationInCollectionUsingCustomCastFromObjectMethod(int numberOfItems)
         {
-            var listOfObjects = Enumerable.Repeat((object)1, _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfUnboxedObjects = listOfObjects.CastFromObject<int>().ToArray();
+                var listOfUnboxedObjects = _listOfBoxedNumbers.CastFromObject<int>().ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfObjects.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackVariableAssignmentForValueTypes()
+        private static void ExecuteAndTrackVariableAssignmentForValueTypes(int numberOfExecutions)
         {
             var number = 1;
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
@@ -188,13 +192,13 @@ namespace HeapAndStackMemoryOptimization
                 ExecuteMultipleTimes(() =>
                 {
                     int number1 = number;
-                });
+                }, numberOfExecutions);
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, _numberOfExecutionsOrItemsForEachCase);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfExecutions);
         }
 
-        private static void ExecuteAndTrackVariableAssignmentForReferenceTypes()
+        private static void ExecuteAndTrackVariableAssignmentForReferenceTypes(int numberOfExecutions)
         {
             object number = 1;
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
@@ -202,13 +206,13 @@ namespace HeapAndStackMemoryOptimization
                 ExecuteMultipleTimes(() =>
                 {
                     object number1 = number;
-                });
+                }, numberOfExecutions);
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, _numberOfExecutionsOrItemsForEachCase);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfExecutions);
         }
 
-        private static void ExecuteAndTrackCastingFromReferenceTypeToAnotherReferenceType()
+        private static void ExecuteAndTrackCastingFromReferenceTypeToAnotherReferenceType(int numberOfExecutions)
         {
             var referenceType = new TestItem();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
@@ -216,58 +220,54 @@ namespace HeapAndStackMemoryOptimization
                 ExecuteMultipleTimes(() =>
                 {
                     var obj = (object)referenceType;
-                });
+                }, numberOfExecutions);
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, _numberOfExecutionsOrItemsForEachCase);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfExecutions);
         }
 
-        private static void ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingSelectMethod()
+        private static void ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingSelectMethod(int numberOfItems)
         {
-            var listOfObjects = Enumerable.Repeat((object)new TestItem(), _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfItems = listOfObjects.Select(o => (TestItem)o).ToArray();
+                var listOfItems = _listOfTestItemsAsObject.Select(o => (TestItem)o).ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfObjects.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingCastMethod()
+        private static void ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingCastMethod(int numberOfItems)
         {
-            var listOfObjects = Enumerable.Repeat((object) new TestItem(), _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfItems = listOfObjects.Cast<TestItem>().ToArray();
+                var listOfItems = _listOfTestItemsAsObject.Cast<TestItem>().ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfObjects.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingOfTypeMethod()
+        private static void ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingOfTypeMethod(int numberOfItems)
         {
-            var listOfObjects = Enumerable.Repeat((object)new TestItem(), _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfItems = listOfObjects.OfType<TestItem>().ToArray();
+                var listOfItems = _listOfTestItemsAsObject.OfType<TestItem>().ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfObjects.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
 
-        private static void ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingMyOwnCastMethod()
+        private static void ExecuteAndTrackCastingFromObjectToOriginalReferenceTypeInCollectionUsingCustomCastFromObjectMethod(int numberOfItems)
         {
-            var listOfObjects = Enumerable.Repeat((object)new TestItem(), _numberOfExecutionsOrItemsForEachCase).ToArray();
             var timeElapsed = GetExecutionElapsedTimeForAction(() =>
             {
-                var listOfItems = listOfObjects.CastFromObject<TestItem>().ToArray();
+                var listOfItems = _listOfTestItemsAsObject.CastFromObject<TestItem>().ToArray();
             });
 
-            OutputTimeElapsedToConsoleForOperation(timeElapsed, listOfObjects.Length);
+            OutputTimeElapsedToConsole(timeElapsed, numberOfItems);
         }
     }
 
-    public class TestItem
+    class TestItem
     {
 
     }
