@@ -2,7 +2,7 @@
 
 namespace HeapAndStackMemoryOptimization
 {
-    public static class CollectionExtensions
+    public static class EnumerableExtensions
     {
         public static IEnumerable<TResult> CastFromObject<TResult>(this IEnumerable<object> objects)
         {
